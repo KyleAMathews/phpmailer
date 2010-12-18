@@ -165,6 +165,13 @@ class PHPMailer {
    */
   public $MessageID         = '';
 
+  /**
+   * Sets the message Date to be used in the Date header.
+   * If empty, the current date will be added.
+   * @var string
+   */
+  public $MessageDate       = '';
+
   /////////////////////////////////////////////////
   // PROPERTIES FOR SMTP
   /////////////////////////////////////////////////
@@ -306,13 +313,13 @@ class PHPMailer {
   // PROPERTIES, PRIVATE AND PROTECTED
   /////////////////////////////////////////////////
 
-  private   $smtp           = NULL;
+  protected   $smtp           = NULL;
   private   $to             = array();
   private   $cc             = array();
   private   $bcc            = array();
   private   $ReplyTo        = array();
   private   $all_recipients = array();
-  private   $attachment     = array();
+  protected   $attachment     = array();
   private   $CustomHeader   = array();
   private   $message_type   = '';
   private   $boundary       = array();
@@ -321,7 +328,7 @@ class PHPMailer {
   private   $sign_cert_file = "";
   private   $sign_key_file  = "";
   private   $sign_key_pass  = "";
-  private   $exceptions     = false;
+  protected   $exceptions     = false;
 
   /////////////////////////////////////////////////
   // CONSTANTS
@@ -1078,7 +1085,12 @@ class PHPMailer {
     $this->boundary[1] = 'b1_' . $uniq_id;
     $this->boundary[2] = 'b2_' . $uniq_id;
 
-    $result .= $this->HeaderLine('Date', self::RFCDate());
+    if($this->MessageDate != '') {
+      $result .= $this->HeaderLine('Date',$this->MessageDate);
+    } else {
+      $result .= $this->HeaderLine('Date', self::RFCDate());
+    }
+
     if($this->Sender == '') {
       $result .= $this->HeaderLine('Return-Path', trim($this->From));
     } else {
@@ -1293,7 +1305,7 @@ class PHPMailer {
    * @access private
    * @return void
    */
-  private function SetMessageType() {
+  protected function SetMessageType() {
     if(count($this->attachment) < 1 && strlen($this->AltBody) < 1) {
       $this->message_type = 'plain';
     } else {
